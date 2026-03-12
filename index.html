@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signal Snake | 中文版贪吃蛇</title>
+    <meta
+      name="description"
+      content="一个可以直接在 VS Code 本地运行的复古街机风贪吃蛇小游戏。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bungee&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero-panel">
+        <p class="eyebrow">VS Code 本地街机项目</p>
+        <h1>Signal Snake</h1>
+        <p class="lede">
+          驾驶这条发光小蛇穿过炽热的信号网格，吞下火花，不断变长，别让自己撞上自己的轨迹。
+        </p>
+        <p class="launch-note">建议通过 VS Code Live Server 或本地静态服务器启动。</p>
+
+        <div class="control-row">
+          <button id="start-button" class="button button-primary">开始游戏</button>
+          <button id="restart-button" class="button button-secondary">重新开始</button>
+        </div>
+
+        <dl class="info-grid">
+          <div>
+            <dt>移动</dt>
+            <dd>方向键 或 WASD</dd>
+          </div>
+          <div>
+            <dt>快捷键</dt>
+            <dd>按 <kbd>R</kbd> 重开；方向键、WASD、<kbd>Enter</kbd> / <kbd>Space</kbd> 都能开局</dd>
+          </div>
+          <div>
+            <dt>目标</dt>
+            <dd>吃掉火花，尽量活得更久</dd>
+          </div>
+          <div>
+            <dt>技术栈</dt>
+            <dd>HTML、CSS、JavaScript、Canvas</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="game-panel" aria-label="贪吃蛇游戏区域">
+        <header class="hud">
+          <div class="stat-card">
+            <span class="stat-label">分数</span>
+            <strong id="score-value">000</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">最高分</span>
+            <strong id="best-value">000</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">速度</span>
+            <strong id="speed-value">180 毫秒</strong>
+          </div>
+          <div class="stat-card status-card">
+            <span class="stat-label">状态</span>
+            <strong id="status-value">待命</strong>
+          </div>
+        </header>
+
+        <div class="board-frame">
+          <canvas
+            id="game-board"
+            width="480"
+            height="480"
+            aria-label="Signal Snake 游戏画布"
+          ></canvas>
+        </div>
+
+        <div class="touch-controls" aria-label="触控方向按钮">
+          <button class="touch-button touch-up" data-direction="up" aria-label="向上移动">▲</button>
+          <button class="touch-button touch-left" data-direction="left" aria-label="向左移动">◀</button>
+          <button class="touch-button touch-down" data-direction="down" aria-label="向下移动">▼</button>
+          <button class="touch-button touch-right" data-direction="right" aria-label="向右移动">▶</button>
+        </div>
+      </section>
+    </main>
+
+    <p id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

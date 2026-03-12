@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.log
+project-summary.txt
+server.close(resolve))
