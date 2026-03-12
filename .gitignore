@@ -3,3 +3,6 @@ dist/
 *.log
 project-summary.txt
 server.close(resolve))
+
+# Local Netlify folder
+.netlify
