@@ -1,5 +1,7 @@
 # Signal Snake
 
+一个由 OpenCode 搭建的中文版贪吃蛇小游戏。
+
 `Signal Snake` 是一个复古街机风的贪吃蛇小游戏，使用 `HTML + CSS + JavaScript + Canvas` 构建，适合直接在 VS Code 中打开、运行和继续扩展。
 
 ## 在 VS Code 中运行
