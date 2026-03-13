@@ -1,6 +1,12 @@
 import { DEFAULT_CONFIG } from './config.js';
 import { createInitialState, pauseGame, queueDirection, resumeGame, stepGame } from './game.js';
-import { getGameAreaScrollBehavior, getPauseButtonState, shouldAutoScrollToGameArea } from './game-ui.js';
+import {
+  getGameAreaFocusTargetId,
+  getPauseResumeMode,
+  getGameAreaScrollBehavior,
+  getPauseButtonState,
+  usesBoardTapPause,
+} from './game-ui.js';
 import { bindInput } from './input.js';
 import { drawGame } from './renderer.js';
 import { buildAnnouncement, formatSpeedLabel, getStatusLabel } from './ui-text.js';
@@ -18,6 +24,7 @@ const gamePanel = document.getElementById('game-panel');
 const gameActions = document.querySelector('.game-actions');
 const gameRestartButton = document.getElementById('game-restart-button');
 const pauseButton = document.getElementById('pause-button');
+const touchControls = document.getElementById('touch-controls');
 const touchButtons = document.querySelectorAll('[data-direction]');
 const liveRegion = document.getElementById('live-region');
 
@@ -56,21 +63,25 @@ function formatScore(value) {
 }
 
 function focusGameArea() {
-  if (!shouldAutoScrollToGameArea(window.innerWidth) || !gamePanel) {
+  if (!usesBoardTapPause(window.innerWidth) || !gamePanel) {
     return;
   }
 
+  const focusTargetId = getGameAreaFocusTargetId(window.innerWidth);
+  const focusTarget = focusTargetId === 'touch-controls' ? touchControls ?? gamePanel : gamePanel;
   const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
   requestAnimationFrame(() => {
-    gamePanel.scrollIntoView({
+    focusTarget.scrollIntoView({
       behavior: getGameAreaScrollBehavior(prefersReducedMotion),
-      block: 'start',
+      block: focusTarget === touchControls ? 'end' : 'start',
     });
   });
 }
 
 function syncHud() {
+  const pauseResumeMode = getPauseResumeMode(window.innerWidth);
+
   scoreValue.textContent = formatScore(state.score);
   bestValue.textContent = formatScore(Math.max(storedBestScore, state.bestScore));
   speedValue.textContent = formatSpeedLabel(state.speed);
@@ -79,7 +90,7 @@ function syncHud() {
   startButton.disabled = state.status === 'running' || state.status === 'paused';
   restartButton.disabled = false;
 
-  const pauseButtonState = getPauseButtonState(state.status);
+  const pauseButtonState = getPauseButtonState(state.status, window.innerWidth);
   pauseButton.textContent = pauseButtonState.label;
   pauseButton.hidden = pauseButtonState.hidden;
   pauseButton.disabled = pauseButtonState.hidden;
@@ -90,6 +101,7 @@ function syncHud() {
     state.status,
     state.score,
     Math.max(storedBestScore, state.bestScore),
+    { pauseResumeMode },
   );
 
   if (announcement !== lastAnnouncement) {
@@ -99,7 +111,9 @@ function syncHud() {
 }
 
 function render() {
-  drawGame(context, state, DEFAULT_CONFIG);
+  drawGame(context, state, DEFAULT_CONFIG, {
+    pauseResumeMode: getPauseResumeMode(window.innerWidth),
+  });
 }
 
 function createFreshState(status = 'idle') {
@@ -132,6 +146,15 @@ function togglePause() {
 
   syncHud();
   render();
+}
+
+function handleBoardTap(event) {
+  if (!usesBoardTapPause(window.innerWidth)) {
+    return;
+  }
+
+  event.preventDefault();
+  togglePause();
 }
 
 function handleDirection(directionName) {
@@ -187,6 +210,7 @@ startButton.addEventListener('click', startGame);
 restartButton.addEventListener('click', restartGame);
 gameRestartButton.addEventListener('click', restartGame);
 pauseButton.addEventListener('click', togglePause);
+canvas.addEventListener('click', handleBoardTap);
 
 bindInput(window, {
   onDirection: handleDirection,
@@ -196,6 +220,11 @@ bindInput(window, {
       startGame();
     }
   },
+});
+
+window.addEventListener('resize', () => {
+  syncHud();
+  render();
 });
 
 touchButtons.forEach((button) => {

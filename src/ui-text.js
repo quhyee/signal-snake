@@ -17,7 +17,7 @@ const OVERLAY_COPY = {
   },
   paused: {
     title: '游戏暂停',
-    subtitle: '点击“继续”恢复游戏，或按“重新开始”立即开新局',
+    subtitle: '点击棋盘继续游戏，或按“重新开始”立即开新局',
   },
   won: {
     title: '清空棋盘',
@@ -25,11 +25,21 @@ const OVERLAY_COPY = {
   },
 };
 
+const PAUSE_RESUME_COPY = {
+  board: '点击棋盘继续游戏，或按“重新开始”立即开新局',
+  button: '点击“继续”恢复游戏，或按“重新开始”立即开新局',
+};
+
+function getPausedSubtitle(pauseResumeMode = 'button') {
+  return PAUSE_RESUME_COPY[pauseResumeMode] ?? PAUSE_RESUME_COPY.button;
+}
+
 export function getStatusLabel(status) {
   return STATUS_LABELS[status] ?? STATUS_LABELS.idle;
 }
 
-export function buildAnnouncement(status, score, bestScore) {
+export function buildAnnouncement(status, score, bestScore, options = {}) {
+  const pauseResumeMode = options.pauseResumeMode ?? 'button';
   const prefix = `状态：${getStatusLabel(status)}。`;
 
   if (status === 'idle') {
@@ -41,7 +51,7 @@ export function buildAnnouncement(status, score, bestScore) {
   }
 
   if (status === 'paused') {
-    return `${prefix}${OVERLAY_COPY.paused.subtitle}。当前分数 ${score}，最高分 ${bestScore}。`;
+    return `${prefix}${getPausedSubtitle(pauseResumeMode)}。当前分数 ${score}，最高分 ${bestScore}。`;
   }
 
   if (status === 'won') {
@@ -51,7 +61,14 @@ export function buildAnnouncement(status, score, bestScore) {
   return `${prefix}当前分数 ${score}，最高分 ${bestScore}。`;
 }
 
-export function getOverlayCopy(status) {
+export function getOverlayCopy(status, options = {}) {
+  if (status === 'paused') {
+    return {
+      ...OVERLAY_COPY.paused,
+      subtitle: getPausedSubtitle(options.pauseResumeMode),
+    };
+  }
+
   return OVERLAY_COPY[status] ?? OVERLAY_COPY.idle;
 }
 

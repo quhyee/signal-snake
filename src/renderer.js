@@ -142,12 +142,12 @@ function drawCenteredWrappedText(ctx, lines, centerX, startY, lineHeight) {
   return lines.length;
 }
 
-function drawOverlay(ctx, width, height, state, config) {
+function drawOverlay(ctx, width, height, state, config, options) {
   if (state.status === 'running') {
     return;
   }
 
-  const { title, subtitle } = getOverlayCopy(state.status);
+  const { title, subtitle } = getOverlayCopy(state.status, options);
 
   const cardWidth = Math.min(360, width - 48);
   const subtitleFont = '14px "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif';
@@ -193,7 +193,7 @@ function drawOverlay(ctx, width, height, state, config) {
   ctx.restore();
 }
 
-export function drawGame(ctx, state, config) {
+export function drawGame(ctx, state, config, options = {}) {
   const width = config.columns * config.cellSize;
   const height = config.rows * config.cellSize;
 
@@ -213,5 +213,5 @@ export function drawGame(ctx, state, config) {
   drawGrid(ctx, width, height, config.cellSize, config.gridColor);
   drawFood(ctx, state.food, config.cellSize, config.foodColor);
   drawSnake(ctx, state.snake, config.cellSize, config.snakeHeadColor, config.snakeBodyColor);
-  drawOverlay(ctx, width, height, state, config);
+  drawOverlay(ctx, width, height, state, config, options);
 }
