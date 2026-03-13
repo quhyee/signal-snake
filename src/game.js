@@ -75,6 +75,28 @@ export function queueDirection(state, directionName) {
   };
 }
 
+export function pauseGame(state) {
+  if (state.status !== 'running') {
+    return state;
+  }
+
+  return {
+    ...state,
+    status: 'paused',
+  };
+}
+
+export function resumeGame(state) {
+  if (state.status !== 'paused') {
+    return state;
+  }
+
+  return {
+    ...state,
+    status: 'running',
+  };
+}
+
 export function stepGame(state, config = DEFAULT_CONFIG, randomFn = Math.random) {
   if (state.status !== 'running') {
     return state;

@@ -10,6 +10,7 @@ import {
 
 test('getStatusLabel returns Chinese labels for known game states', () => {
   assert.equal(getStatusLabel('running'), '进行中');
+  assert.equal(getStatusLabel('paused'), '暂停中');
   assert.equal(getStatusLabel('won'), '已通关');
   assert.equal(getStatusLabel('gameover'), '已撞毁');
   assert.equal(getStatusLabel('idle'), '待命');
@@ -30,10 +31,24 @@ test('buildAnnouncement includes the start guidance when the game is idle', () =
   );
 });
 
+test('buildAnnouncement includes paused guidance when the game is paused', () => {
+  const message = buildAnnouncement('paused', 20, 80);
+
+  assert.equal(
+    message,
+    '状态：暂停中。点击“继续”恢复游戏，或按“重新开始”立即开新局。当前分数 20，最高分 80。',
+  );
+});
+
 test('getOverlayCopy returns Chinese overlay text for each visible state', () => {
   assert.deepEqual(getOverlayCopy('idle'), {
     title: '准备开始',
     subtitle: '点击“开始游戏”，按 Enter / Space，或使用方向键 / WASD 直接开局',
+  });
+
+  assert.deepEqual(getOverlayCopy('paused'), {
+    title: '游戏暂停',
+    subtitle: '点击“继续”恢复游戏，或按“重新开始”立即开新局',
   });
 
   assert.deepEqual(getOverlayCopy('won'), {

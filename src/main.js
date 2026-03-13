@@ -1,5 +1,6 @@
 import { DEFAULT_CONFIG } from './config.js';
-import { createInitialState, queueDirection, stepGame } from './game.js';
+import { createInitialState, pauseGame, queueDirection, resumeGame, stepGame } from './game.js';
+import { getGameAreaScrollBehavior, getPauseButtonState, shouldAutoScrollToGameArea } from './game-ui.js';
 import { bindInput } from './input.js';
 import { drawGame } from './renderer.js';
 import { buildAnnouncement, formatSpeedLabel, getStatusLabel } from './ui-text.js';
@@ -13,6 +14,10 @@ const speedValue = document.getElementById('speed-value');
 const statusValue = document.getElementById('status-value');
 const startButton = document.getElementById('start-button');
 const restartButton = document.getElementById('restart-button');
+const gamePanel = document.getElementById('game-panel');
+const gameActions = document.querySelector('.game-actions');
+const gameRestartButton = document.getElementById('game-restart-button');
+const pauseButton = document.getElementById('pause-button');
 const touchButtons = document.querySelectorAll('[data-direction]');
 const liveRegion = document.getElementById('live-region');
 
@@ -50,14 +55,36 @@ function formatScore(value) {
   return String(value).padStart(3, '0');
 }
 
+function focusGameArea() {
+  if (!shouldAutoScrollToGameArea(window.innerWidth) || !gamePanel) {
+    return;
+  }
+
+  const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
+  requestAnimationFrame(() => {
+    gamePanel.scrollIntoView({
+      behavior: getGameAreaScrollBehavior(prefersReducedMotion),
+      block: 'start',
+    });
+  });
+}
+
 function syncHud() {
   scoreValue.textContent = formatScore(state.score);
   bestValue.textContent = formatScore(Math.max(storedBestScore, state.bestScore));
   speedValue.textContent = formatSpeedLabel(state.speed);
   statusValue.textContent = getStatusLabel(state.status);
 
-  startButton.disabled = state.status === 'running';
+  startButton.disabled = state.status === 'running' || state.status === 'paused';
   restartButton.disabled = false;
+
+  const pauseButtonState = getPauseButtonState(state.status);
+  pauseButton.textContent = pauseButtonState.label;
+  pauseButton.hidden = pauseButtonState.hidden;
+  pauseButton.disabled = pauseButtonState.hidden;
+  gameActions.classList.toggle('game-actions-single', pauseButtonState.hidden);
+  gameRestartButton.disabled = false;
 
   const announcement = buildAnnouncement(
     state.status,
@@ -87,10 +114,24 @@ function startGame() {
   accumulator = 0;
   syncHud();
   render();
+  focusGameArea();
 }
 
 function restartGame() {
   startGame();
+}
+
+function togglePause() {
+  if (state.status === 'running') {
+    state = pauseGame(state);
+  } else if (state.status === 'paused') {
+    state = resumeGame(state);
+  } else {
+    return;
+  }
+
+  syncHud();
+  render();
 }
 
 function handleDirection(directionName) {
@@ -144,12 +185,14 @@ function loop(timestamp) {
 
 startButton.addEventListener('click', startGame);
 restartButton.addEventListener('click', restartGame);
+gameRestartButton.addEventListener('click', restartGame);
+pauseButton.addEventListener('click', togglePause);
 
 bindInput(window, {
   onDirection: handleDirection,
   onRestart: restartGame,
   onStart: () => {
-    if (state.status !== 'running') {
+    if (state.status === 'idle' || state.status === 'gameover' || state.status === 'won') {
       startGame();
     }
   },

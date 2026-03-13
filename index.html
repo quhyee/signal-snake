@@ -51,7 +51,7 @@
         </dl>
       </section>
 
-      <section class="game-panel" aria-label="贪吃蛇游戏区域">
+      <section id="game-panel" class="game-panel" aria-label="贪吃蛇游戏区域">
         <header class="hud">
           <div class="stat-card">
             <span class="stat-label">分数</span>
@@ -70,6 +70,13 @@
             <strong id="status-value">待命</strong>
           </div>
         </header>
+
+        <div class="game-actions" aria-label="游戏操作">
+          <button id="game-restart-button" class="button button-secondary button-compact">重新开始</button>
+          <button id="pause-button" class="button button-primary button-compact" hidden>
+            暂停
+          </button>
+        </div>
 
         <div class="board-frame">
           <canvas

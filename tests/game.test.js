@@ -5,7 +5,9 @@ import { DEFAULT_CONFIG } from '../src/config.js';
 import {
   createFoodPosition,
   createInitialState,
+  pauseGame,
   queueDirection,
+  resumeGame,
   stepGame,
 } from '../src/game.js';
 
@@ -150,4 +152,37 @@ test('createFoodPosition never returns a tile already occupied by the snake', ()
   const food = createFoodPosition(occupied, 4, 4, () => 0);
 
   assert.deepEqual(food, { x: 3, y: 0 });
+});
+
+test('pauseGame changes a running game to paused', () => {
+  const state = {
+    ...createInitialState(DEFAULT_CONFIG),
+    status: 'running',
+  };
+
+  const nextState = pauseGame(state);
+
+  assert.equal(nextState.status, 'paused');
+});
+
+test('resumeGame changes a paused game back to running', () => {
+  const state = {
+    ...createInitialState(DEFAULT_CONFIG),
+    status: 'paused',
+  };
+
+  const nextState = resumeGame(state);
+
+  assert.equal(nextState.status, 'running');
+});
+
+test('stepGame does not advance while the game is paused', () => {
+  const state = {
+    ...createInitialState(DEFAULT_CONFIG),
+    status: 'paused',
+  };
+
+  const nextState = stepGame(state, DEFAULT_CONFIG, () => 0);
+
+  assert.deepEqual(nextState, state);
 });
